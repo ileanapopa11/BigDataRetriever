@@ -48,8 +48,12 @@
       <h2>Architecture</h2>
       <p>The user connects to the Web Interface of the BIR project, where the topics can be chosen and a query is
       generated, not unlike the tool available <a href="https://tools.wmflabs.org/hay/vizquery/">here</a>. After the user
-      describes the data they are interested in, the input is transformed in a SPARQL query. Wikidata databases are queried
-      through the  Sparql endpoint provided and the results are generated in JSON format.</p>
+      describes the data they are interested in, the input is transformed in a SPARQL query. </p>
+      <p>The suggestions module prepares all the queries necessary that include new related data that might be of interest. Wikidata databases 
+      are queried through the SPARQL endpoint provided and the results are generated in JSON format. All the data is then uploaded to Hadoop
+      and using Hive and Impala, the final results that will be displayed for the user are sent to the Translations Module that is based on the
+      item codes can generate data in multiple languages without having a bias for a particular one, the focus being on the knowledge itself, and
+      not constrained by a specific translation of the concepts.</p>
       <img src="arch_diagram.png" style="width: 800px;" alt="Architecture Diagram">
     </section>
 
@@ -57,43 +61,55 @@
     <section id="structure">
       <!-- review? -->
       <h2>Internal data structures/models</h2>
-      <p>
-          Coming soon!
-      </p>
       <section id="Root">
         <!-- review? -->
-        <h3>RDF</h3>
+        <h3>Data format choice JSON/RDF</h3>
         <p>
-            RDF stands for Resource Description Framework and is a standardfor data interchange, and a mature,
-            thoroughly-tested mand robust technology for modelling data. Representing data in RDF allows
-            information to be identified, disambiguated and interconennected by software agents and various
+            RDF stands for Resource Description Framework and is a standard for data interchange, and a mature,
+            thoroughly-tested and robust technology for modelling data. Representing data in RDF allows
+            information to be identified, disambiguated and inter-connected by software agents and various
             systems in order to be read, analyzed or acted upon.
         </p>
         <p>
-            RDF serves as an uniform structure to express any kind of information using simple statements, no
-            matters its source. All data, regardless of their origin, can be converted to RDF data.
+            RDF serves as an uniform structure to express any kind of information using simple statements, not depending
+            on their source. All data, regardless of their origin, can be converted to RDF data.
         </p>
         <p>
-          Wikidata supports RDF representation of data and is able to return answers to queries in this format.
-          RDF data dumps are available as well.
+            Wikidata supports RDF representation of data and is able to return answers to queries in this format.
+            RDF data dumps are available as well.
         </p>
         <p>
-            For the sake of simplicity, we used JSON as the format of choice when requesting data from the SparQL
-            endpoint rather than RDF.
+            Currently, the JSON format was considered as the format of choice for the initial test phases 
+            when requesting data from the SparQL endpoint rather than RDF, especially for the convenience 
+            of writing the data in a key/value dictionary that is the main format used in the MapReduce jobs integrated with the application.
         </p>
-      </section>
-      <section id="article">
-        <!-- review? -->
-        <h3>MapReduce</h3>
         <p>
-          Hadoop distributes the data as it is initially stored in the system. Many nodes work in parallel,
-          each on their own part of the overall dataset. While preparing the data, extracting knowledge from it
-          and making relevant suggestions based on the user's interests, this Big Data approach can tackle problems
-          like <it>Graph creation and analysis</it> and <it>Pattern Recognition</it> that proves to be meaningful for
-          the problem at hand.
+            In the next stage, we will explore the Map-Reduce based SPARQL processing engine, called SHOE 
+            (SPARQL on Hadoop with Optimization Encoding) to handle billions of RDF triples. 
+            SHOE consists of three major components: 
+            (1) the RDF data loader, 
+            (2) the partition generator
+            (3) the query processor. 
+            While this demonstration mainly focuses on enhancing SPARQL processing in the Hadoop platform.
         </p>
 
       </section>
+      <section id="article">
+        <!-- review? -->
+        <h3>Data for Suggestions and processing with MapReduce</h3>
+        <p>
+          Hadoop distributes the data as it is initially stored in the system. Many nodes work in parallel, 
+          each on their own part of the overall dataset. While preparing the data, extracting knowledge from it
+          and making relevant suggestions based on the user's interests, this Big Data approach can tackle problems
+          like <it>Graph creation and analysis</it> and <it>Pattern Recognition</it> that proves to be meaningful for
+          the problem at hand. 
+        </p>
+        <img src="map_reduce.png" width="600px" alt="MAP REDUCE">
+
+        <p>A python module will be responsible for creating suggestions based on the user input. This extended data will be
+        aggregated and using Hive and Impala will be processed with Hadoop to prepare the Suggestions Results.</p>
+      </section>
+    </section>
     </section>
 
     <section id="semantics">
@@ -170,24 +186,6 @@
 
     </section>
 
-    <section id="inline">
-
-        <h3>Others</h3>
-        <p>
-          <a href="https://www.w3.org/TR/html51/semantics.html#text-level-semantics">Inline
-          elements</a> decorate, describe, and enrich text. Inline elements can be used inside of
-          hunk elements, heading elements, and captioning elements. Where applicable, they can nest
-          within one another. Inline images and inline math can be inlcuded as well. This can be
-          accomplished using <code>img</code> for images or <code>math</code> for formulas.
-          Equations can be displayed inline or as blocks within a paragaph.
-        </p>
-        <figure typeof="schema:SoftwareSourceCode" resource="#mathblock-example"
-                id="mathblock-example" role="doc-example">
-          <figcaption></figcaption>
-        </figure>
-      </section>
-
-
     <section id="scholarly-article">
       <!-- review? -->
       <h2>User Interaction</h2>
@@ -215,23 +213,19 @@
     </section>
     <section id="hypermedia">
       <!-- review? -->
-      <h2>Hypermedia Controls</h2>
-      <!--
-        - explain how to model hypermedia integration, cases:
-          - viewing
-          - paying
-          - annotating
-      -->
-            <p>Coming soon!</p>
-    </section>
-    <section id="processing-model">
-      <!-- review? -->
-      <h2>Processing Model</h2>
-      <!--
-        - basically explain what a processor ignores and what its internal model looks like
-        - the processing extracts (almost) pure HTML, it then uses the RDFa to enrich that
-      -->
-            <p>Coming soon!</p>
+      <h2>User Interface</h2>
+      <p>
+        For basic queries, the user can use the <it>Simple Query Interface</it> to specify rules for
+        accessing data: a property and an item that will be mapped to the internal codes used in Wikidata.
+      </p>
+      <img src="mock1.png" width="600px" alt="Mock Simple Query">
+      <p class="issue">
+        For more complex queries, the <it>SPARQL Query</it> interface is available, where the entire query 
+        can be specified. This USE CASE lets the user have more power over the retreived data, being able
+        to pick any fields in any order visible in the item's <a href="https://www.wikidata.org/wiki/Q378619">page</a>.
+      </p>
+      <img src="mock2.png" width="600px" alt="Mock SPARQL Query">
+      
     </section>
     <section id="acks">
       <!-- review? -->
