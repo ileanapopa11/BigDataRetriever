@@ -1,1 +1,244 @@
-<h1>Hello!</h1>
+<!DOCTYPE html>
+<!-- <html style="background-color:#666666"> -->
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BIR - Big Data Retriever</title>
+    <link rel="stylesheet" href="docs/css/scholarly.css"> <!-- css/scholarly.min.css -->
+    <script src="docs/js/scholarly.min.js"></script>
+  </head>
+  <body prefix="schema: http://schema.org">
+    <header>
+      <div class="banner">
+        <img src="docs/LOGO.png" width="227" height="50" alt="BIR logo">
+        <div class="status" style="background-color:#db7b27">WADe Project</div>
+      </div>
+      <h2>BIR - Big Data Retriever </h2>
+    </header>
+
+     <div role="contentinfo">
+      <dl>
+        <dt>Authors</dt>
+        <dd>
+          <p>Andrei Palihovici, Student, M.Sc. in Computational Linguistics</p>
+          <p>Ileana Popa, Student, M.Sc. in Software Engineering</p>
+        </dd>
+      </dl>
+    </div>
+    <section typeof="sa:about" id="about" role="doc-about">
+      <h2>About</h2>
+      <p>
+        BIR- Big Data Retriever is a Web System that is able to query, compare, visualize, share,
+        summarize, large sets of data/knowledge and additional resources provided by Wikidata.
+  The platform will give the user access to everything that he finds of interest that is available
+        in the Wikidata collaboratively edited knowledge base, items and topics ranging from
+        1988 Summer Olympics, to love or Elvis Presley. Every item in this valuable collection of data is
+  uniquely identified by an unique number, making it possible for the concept to be translated without
+  favoring any language. The tool can for this reason easily recommend related information and similar
+  resources available in other languages. In the background, data will be processed in a distributed,
+  fast and reliable manner, using Hadoop MapReduce.
+
+      </p>
+    </section>
+    <section typeof="sa:roadmap" id="roadmap" role="doc-roadmap">
+    <h2>Roadmap and project progress</h2>
+    <h3> Done </h3>
+    <p>10 Oct. : Project subject chosen - BIR</p>
+    <p>11 Oct. : Created project repo and public page (current page)</p>
+    <p>18 Oct. : Started work on Scholarly Report</p>
+    <p>19 Oct. : Wrote a basic RESTful API</p>
+    <p>19 Oct. : Decided on the underlying technologies to be used</p>
+    <p>19 Oct. : Made some basic diagrams for both architecture and use-case scenarios</p>
+    <p>24 Oct. : Diagrams done</p>
+    <p>25 Oct. : Started research (light reading) on Big Data techniques that might prove helpful</p>
+    <p>26 Oct. : Started work on public blog (current page)</p>
+    <p>09 Nov. : Wrapped up work on public page, just small adjustments left </p>
+    <p>09 Nov. : Reworked one of the diagrams to fit more use-cases </p>
+    <p>17 Nov. : Came up with another, more in-depth architecture diagram</p>
+    <p>17 Nov. : Decided against using RDF data in favour of JSON</p>
+    <p>26 Nov. : Finished Scholarly Report</p>
+    <p>26 Nov. : Finished public blog page</p>
+    <p>27 Nov. : Uploaded everything we have so far to the github repo</p>
+    <p>27 Nov. : Presentation...</p>
+
+    <h3>To be done </h3>
+    <p>by 30 Nov. :  Get a small python module that can succesfully query the SparQL endpoint working</p>
+    <p>by 06 Dec. : Decide what other knowledge base to use other than Wikidata (DBPedia)</p>
+    <p>xy ???. : Implement the backend part</p>
+    <p>xy ???. : Implement the frontend part</p>
+    <p>xy ???. : Add (and thorougly test) every requested functionality</p>
+  </section>
+    <section id="introduction" role="doc-introduction">
+      <!-- review? -->
+      <h2>Architecture</h2>
+      <p>The user connects to the Web Interface of the BIR project, where the topics can be chosen and a query is
+      generated, not unlike the tool available <a href="https://tools.wmflabs.org/hay/vizquery/">here</a>. After the user
+      describes the data they are interested in, the input is transformed in a SPARQL query. Wikidata databases are queried
+      through the  Sparql endpoint provided and the results are generated in JSON format.</p>
+      <img src="docs/arch_diagram.png" style="width: 800px;" alt="Architecture Diagram">
+    </section>
+
+    <section id="semantics">
+
+      <h2>External Data Sources</h2>
+
+      <section id="person-org">
+        <h3>Wikidata</h3>
+        <p>Belonging to the Wikimedia family of websites, alongside the famous Wikipedia, Wikidata is a place that
+        stores structured data in many languages. The basic entity stored is an Item and can be a thing, a place,
+        a person, an idea or anything else. Each article from Wikipedia corresponds to a Wikidata Item, but there
+        are many Wikidata Items that have no Wikipedia pages associated to them.</p>
+
+        <p>All languages are treated the same way because Items are not identified by specific words, but by unique
+        identifiers prefixed with the letter Q, known as "QID". This allows the item to be translated without any
+        language bias. Also, some items named in the same way can have different meaning, thus being identified by different codes.
+        For example, Elvis Presley (Q303) represents the American singer and actor and Elvis Presley (Q610926) represents the self titled album.</p>
+
+        <p>Similarly to items, Wikidata stores a list of Statements associated to an item. Each statement has a Property and a Value, and the Property
+        has a generic identifier that starts with P instead of Q. For example the item Q1490 (Tokyo) has associated the value P17 that represents
+        "country" in English, "государство" in Russian and so on. The value P17(contry) for Q1490(Tokyo) is Q17(Japan).</p>
+
+        <p>Not all statement have to point to numeric values, for example one of the statements about Tokyo is the flag Q20900820, which points to an
+          image of the <a href="https://commons.wikimedia.org/wiki/File:Flag_of_Tokyo_Prefecture.svg">Flag of Tokyo Prefecture</a>.</p>
+
+        <p>Data provided by Wikidata can transform into knowledge or interesting facts, as Amir E. Aharoni, that works at Wikimedia Foundation
+        pointed out in a Quora answer. In this <a href="https://commons.wikimedia.org/wiki/File:Flag_of_Tokyo_Prefecture.svg">article</a> Buzzfeed came
+        up with a list of the 30 most famous people to die each year since 1900.</p>
+      </section>
+
+      <section id="typing-sections">
+        <h3>SparQL Endpoint</h3>
+        <p>
+        The service provided by <a href="https://query.wikidata.org">Wikidata Query Service</a> is used programatically from python by submitting requests to
+        https://query.wikidata.org/sparql, as shown in the code below. The requests module handles HTTP requests, runs a SPARQL query and can return the resulted
+        data in XML, CSV, JSON or BINARY RDF.
+        </p>
+       <p> <pre><code style="font-size: 12.5px;">
+          import requests
+
+          url = <b style="color: #6b6b6b; /*light gray*/">'https://query.wikidata.org/sparql'</b>
+          <b style="color:#eb8934;/*orange*/">
+          query = r"""
+          #Illustrates optional fields, instances of subclasses, language fallback on label service, date to
+          #year conversion
+
+          #Horses on Wikidata
+          SELECT DISTINCT ?horse ?horseLabel ?mother ?father (year(?birthdate) as ?birthyear) (year(?deathdate) \
+          as ?deathyear) ?genderLabel
+          WHERE
+          {
+            ?horse wdt:P31/wdt:P279* wd:Q726 .     # Instance et sous-classes de Q726-Cheval
+
+            OPTIONAL{?horse wdt:P25 ?mother .}       # P25  : Mère
+            OPTIONAL{?horse wdt:P22 ?father .}       # P22  : Père
+            OPTIONAL{?horse wdt:P569 ?birthdate .} # P569 : Date de naissance
+            OPTIONAL{?horse wdt:P570 ?deathdate .}     # P570 : Date de décès
+            OPTIONAL{?horse wdt:P21 ?gender .}       # P21  : Sexe
+
+            SERVICE wikibase:label { #BabelRainbow
+              bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr,ar,be,bg,bn,ca,cs,da,de,el,en,es,et,fa,fi,
+              he,hi,hu,hy,id,it,ja,jv,ko,nb,nl,eo,pa,pl,pt,ro,ru,sh,sk,sr,sv,sw,te,th,tr,uk,yue,vec,vi,zh"
+            }
+          }
+          ORDER BY ?horse
+          """
+          </b>
+          r = requests.get(url, params = {'format': 'json', 'query': query})
+          data = r.json()
+
+          print(data)
+      </code></pre></p>
+      </section>
+
+    </section>
+
+    <section id="inline">
+
+        <h3>Others</h3>
+        <p>
+          <a href="https://www.w3.org/TR/html51/semantics.html#text-level-semantics">Inline
+          elements</a> decorate, describe, and enrich text. Inline elements can be used inside of
+          hunk elements, heading elements, and captioning elements. Where applicable, they can nest
+          within one another. Inline images and inline math can be inlcuded as well. This can be
+          accomplished using <code>img</code> for images or <code>math</code> for formulas.
+          Equations can be displayed inline or as blocks within a paragaph.
+        </p>
+        <figure typeof="schema:SoftwareSourceCode" resource="#mathblock-example"
+                id="mathblock-example" role="doc-example">
+          <figcaption></figcaption>
+        </figure>
+      </section>
+
+
+    <section id="scholarly-article">
+      <!-- review? -->
+      <h2>User Interaction</h2>
+      <img src="usecase.PNG" width="100%">
+
+        </img>
+      <p>
+          The user is first presented with a homescreen that displays all the available options:
+      </p>
+
+    <p>
+        <i>Create query</i> allows the user to create a new query and select either Wikidata, DBPedia or both as the knowledge base.
+        The user also has the choice of using either the built-in GUI for creating queries or using <i>advanced syntax</i> in
+        order to write the query manually themselves. The results are nevertheless the same.
+    </p>
+    <p>
+        <i>Recent</i> shows the 10 previous queries inputed by the user, provided cookies are enabled.
+    </p>
+    <p>
+        <i>Examples</i> displays a list of possible queries in both simple and advanced syntax.
+    </p>
+    <p>
+        Postprocessing is also available via additional filtering and grouping methods (such as grouping results by country or time spans etc).
+    </p>
+    </section>
+    <section id="hypermedia">
+      <!-- review? -->
+      <h2>Hypermedia Controls</h2>
+      <!--
+        - explain how to model hypermedia integration, cases:
+          - viewing
+          - paying
+          - annotating
+      -->
+            <p>Coming soon!</p>
+    </section>
+    <section id="processing-model">
+      <!-- review? -->
+      <h2>Processing Model</h2>
+      <!--
+        - basically explain what a processor ignores and what its internal model looks like
+        - the processing extracts (almost) pure HTML, it then uses the RDFa to enrich that
+      -->
+            <p>Coming soon!</p>
+    </section>
+    <section id="acks">
+      <!-- review? -->
+      <h2>Conclusions and Improvement</h2>
+      <p>BiR set out to be a great visualization and aggregator for Big Data and is shaping up nicely. Its intended purpose is to make exploratory analysis of resources
+      such as those provided by Wikidata or DBPedia much easier, and bring new, intuitive and descriptive visual representations to the table.</p>
+      <p>
+          Using JavaScript and Python, BiR is very lightweight and completely platform-independent; being available on virtually any OS. Full-fledged support for mobile versions
+          is in the works as well.
+      </p>
+
+    </section>
+
+    <section id="refs">
+      <h2>References</h2>
+      <a href="https://www.wikidata.org/wiki/Wikidata:Data_access">https://www.wikidata.org/wiki/Wikidata:Data_access</a>
+      <br>
+      <a href="https://tools.wmflabs.org/hay/directory/#/search/wikidata">Tools Directory</a>
+      <br>
+      <a href="https://www.quora.com/What-is-Wikidata">https://www.quora.com/What-is-Wikidata</a>
+      <br>
+      <a href="https://towardsdatascience.com/where-do-mayors-come-from-querying-wikidata-with-python-and-sparql-91f3c0af22e2">https://towardsdatascience.com/where-do-mayors-come-from-querying-wikidata-with-python-and-sparql-91f3c0af22e2</a>
+
+    </section>
+
+  </body>
+</html>
