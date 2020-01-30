@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- <html style="background-color:#666666"> -->
 <html>
   <head>
     <meta charset="utf-8">
@@ -21,7 +20,7 @@
       <dl>
         <dt>Authors</dt>
         <dd>
-          <p>Andrei Palihovici, Student, M.Sc. in Computational Linguistics</p>
+          <p>Andrei Palihovici, Student, M.Sc. in Distributed Systems</p>
           <p>Ileana Popa, Student, M.Sc. in Software Engineering</p>
         </dd>
       </dl>
@@ -47,13 +46,9 @@
       <!-- review? -->
       <h2>Architecture</h2>
       <p>The user connects to the Web Interface of the BIR project, where the topics can be chosen and a query is
-      generated, not unlike the tool available <a href="https://tools.wmflabs.org/hay/vizquery/">here</a>. After the user
-      describes the data they are interested in, the input is transformed in a SPARQL query. </p>
-      <p>The suggestions module prepares all the queries necessary that include new related data that might be of interest. Wikidata databases 
-      are queried through the SPARQL endpoint provided and the results are generated in JSON format. All the data is then uploaded to Hadoop
-      and using Hive and Impala, the final results that will be displayed for the user are sent to the Translations Module that is based on the
-      item codes can generate data in multiple languages without having a bias for a particular one, the focus being on the knowledge itself, and
-      not constrained by a specific translation of the concepts.</p>
+      generated, similarly with the tool <a href="https://tools.wmflabs.org/hay/vizquery/">here</a>. After the user
+      describes the data he's interested in, this is transformed in a SPARQL query. Wikidata databases are queried
+      through the  Sparql endpoint provided and the results are generated in JSON format.</p>
       <img src="arch_diagram.png" style="width: 800px;" alt="Architecture Diagram">
     </section>
 
@@ -61,55 +56,18 @@
     <section id="structure">
       <!-- review? -->
       <h2>Internal data structures/models</h2>
-      <section id="Root">
-        <!-- review? -->
-        <h3>Data format choice JSON/RDF</h3>
-        <p>
-            RDF stands for Resource Description Framework and is a standard for data interchange, and a mature,
-            thoroughly-tested and robust technology for modelling data. Representing data in RDF allows
-            information to be identified, disambiguated and inter-connected by software agents and various
-            systems in order to be read, analyzed or acted upon.
-        </p>
-        <p>
-            RDF serves as an uniform structure to express any kind of information using simple statements, not depending
-            on their source. All data, regardless of their origin, can be converted to RDF data.
-        </p>
-        <p>
-            Wikidata supports RDF representation of data and is able to return answers to queries in this format.
-            RDF data dumps are available as well.
-        </p>
-        <p>
-            Currently, the JSON format was considered as the format of choice for the initial test phases 
-            when requesting data from the SparQL endpoint rather than RDF, especially for the convenience 
-            of writing the data in a key/value dictionary that is the main format used in the MapReduce jobs integrated with the application.
-        </p>
-        <p>
-            In the next stage, we will explore the Map-Reduce based SPARQL processing engine, called SHOE 
-            (SPARQL on Hadoop with Optimization Encoding) to handle billions of RDF triples. 
-            SHOE consists of three major components: 
-            (1) the RDF data loader, 
-            (2) the partition generator
-            (3) the query processor. 
-            While this demonstration mainly focuses on enhancing SPARQL processing in the Hadoop platform.
-        </p>
-
-      </section>
       <section id="article">
         <!-- review? -->
-        <h3>Data for Suggestions and processing with MapReduce</h3>
+        <h3>MapReduce</h3>
         <p>
-          Hadoop distributes the data as it is initially stored in the system. Many nodes work in parallel, 
+          Hadoop distributes the data as it is initially stored in the system. Many nodes work in parallel,
           each on their own part of the overall dataset. While preparing the data, extracting knowledge from it
           and making relevant suggestions based on the user's interests, this Big Data approach can tackle problems
           like <it>Graph creation and analysis</it> and <it>Pattern Recognition</it> that proves to be meaningful for
-          the problem at hand. 
+          the problem at hand.
         </p>
-        <img src="map_reduce.png" width="600px" alt="MAP REDUCE">
 
-        <p>A python module will be responsible for creating suggestions based on the user input. This extended data will be
-        aggregated and using Hive and Impala will be processed with Hadoop to prepare the Suggestions Results.</p>
       </section>
-    </section>
     </section>
 
     <section id="semantics">
@@ -141,24 +99,21 @@
       </section>
 
       <section id="typing-sections">
-        <h3>SparQL Endpoint</h3>
+        <h3>Code Examples</h3>
         <p>
         The service provided by <a href="https://query.wikidata.org">Wikidata Query Service</a> is used programatically from python by submitting requests to
         https://query.wikidata.org/sparql, as shown in the code below. The requests module handles HTTP requests, runs a SPARQL query and can return the resulted
         data in XML, CSV, JSON or BINARY RDF.
         </p>
-       <p> <pre><code style="font-size: 12.5px;">
+        <pre><code style="font-size: 12.5px;">
           import requests
 
           url = <b style="color: #6b6b6b; /*light gray*/">'https://query.wikidata.org/sparql'</b>
           <b style="color:#eb8934;/*orange*/">
           query = r"""
-          #Illustrates optional fields, instances of subclasses, language fallback on label service, date to
-          #year conversion
-
+          #Illustrates optional fields, instances of subclasses, language fallback on label service, date to year conversion
           #Horses on Wikidata
-          SELECT DISTINCT ?horse ?horseLabel ?mother ?father (year(?birthdate) as ?birthyear) (year(?deathdate) \
-          as ?deathyear) ?genderLabel
+          SELECT DISTINCT ?horse ?horseLabel ?mother ?father (year(?birthdate) as ?birthyear) (year(?deathdate) as ?deathyear) ?genderLabel
           WHERE
           {
             ?horse wdt:P31/wdt:P279* wd:Q726 .     # Instance et sous-classes de Q726-Cheval
@@ -170,8 +125,7 @@
             OPTIONAL{?horse wdt:P21 ?gender .}       # P21  : Sexe
 
             SERVICE wikibase:label { #BabelRainbow
-              bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr,ar,be,bg,bn,ca,cs,da,de,el,en,es,et,fa,fi,
-              he,hi,hu,hy,id,it,ja,jv,ko,nb,nl,eo,pa,pl,pt,ro,ru,sh,sk,sr,sv,sw,te,th,tr,uk,yue,vec,vi,zh"
+              bd:serviceParam wikibase:language "[AUTO_LANGUAGE],fr,ar,be,bg,bn,ca,cs,da,de,el,en,es,et,fa,fi,he,hi,hu,hy,id,it,ja,jv,ko,nb,nl,eo,pa,pl,pt,ro,ru,sh,sk,sr,sv,sw,te,th,tr,uk,yue,vec,vi,zh"
             }
           }
           ORDER BY ?horse
@@ -181,62 +135,163 @@
           data = r.json()
 
           print(data)
-      </code></pre></p>
+        </code></pre>
+
+        <img src="code_autocomplete.png" width="500px" alt="Mock Simple Query">
+        <p>
+        The wikidata api <i>//www.wikidata.org/w/api.php?callback=?</i> can be used to provide
+        an autocomplete functionality, such that the items and properties desired by the users
+        can be matched with existing wikidata numerical categories that will be connected further with the other
+        information searched.
+        </p>
+        <img src="result_autocomplete.png" height="300px" alt="Mock Simple Query">
+
+        <figure typeof="schema:SoftwareSourceCode" resource="#mathblock-example"
+                id="mathblock-example" role="doc-example">
+          <figcaption></figcaption>
+        </figure>
+
+
       </section>
 
     </section>
 
+    <section id="inline">
+
+        <h3>Usecases</h3>
+
+        <p class="issue">
+        USECASE 1: Simple query - searching for a simple Item <br>
+        subject-<i>Item</i>  predicate-<i>instance of</i> (P31) object-<i>house cat</i> (Q146)
+        </p>
+        <p>
+          The user can enter all the necessary data on the default line displayed on the screen, in
+          which case the subject is the current Item. In this example, the predicate is <i>instance of</i> (P31)
+          and the object <i>house cat</i.> (Q146).
+        </p>
+        <p>subject-<i>Item</i>  predicate-<i>instance of</i> (P31) object-<i>house cat</i> (Q146)</p>
+        <img src="cats.png" height="500px" alt="Simple Query">
+
+        <p class="issue">
+        USECASE 2: Medium query - Searching for Paintings that are also Self-Portraits<br>
+        subject-<i>Item</i>  predicate-<i>instance of</i> (P31) object-<i>painting</i> (Q3305213) <br>
+        subject-<i>Item</i>  predicate-<i>genre</i> (P136) object-<i>self-portrait</i> (Q192110)
+        <p></p>
+
+        <p>
+          The user can add a new set of <i>subject-predicate-object</i> for more complex queries to
+          search for multiple properties.
+        </p>
+
+        <ul style="color:grey">
+          <li>
+            <i>subject</i>
+            <i>predicate</i>
+            <i>object</i>
+          </li>
+          <li>
+            <b>Item</b>
+            <b>instance of</b> (P31)
+            <b>painting</b> (Q5)   <br>
+          </li>
+          <li>
+            <b>Item</b>
+            <b>genre</b> (P1576)
+            <b>self-portrait</b> (Q83364) <br>
+          </li>
+        </ul>
+
+        <img src="p4.png" height="700px" alt="Medium Query">
+
+
+        <p class="issue">
+        USECASE 3: Multiple subject Query <br>
+        subject-<i>?item</i>  predicate-<i>instance of</i> (P31) object-<i>human</i> (Q5) <br>
+        subject-<i>?item</i>  predicate-<i>lifestyle</i> (P1576) object-<i>vegetarianism</i> (Q83364) <br>
+        subject-<i>?item</i>  predicate-<i>spouse</i> (P26) object-<i>?spouse</i> <br>
+        subject-<i>?spouse</i>  predicate-<i>lifestyle</i> (P1576) object-<i>vegetarianism</i> (Q83364)
+        </p>
+        <p>
+          The user can enter all the necessary data on the default line displayed on the screen, in
+          which case the subject is the current Item. In this example, the predicate is <i>instance of</i> (P31)
+          and the object <i>house cat</i.> (Q146).
+        </p>
+
+        <ul style="color:grey">
+          <li>
+            <i>subject</i>
+            <i>predicate</i>
+            <i>object</i>
+          </li>
+          <li>
+            <b>?item</b>
+            <b>instance of</b> (P31)
+            <b>human</b> (Q5)   <br>
+          </li>
+          <li>
+            <b>?item</b>  <b>lifestyle</b> (P1576) <b>vegetarianism</b> (Q83364) <br>
+          </li>
+          <li>
+            <b>?item</b>  <b>spouse</b> (P26) <b>?spouse</b> <br>
+          </li>
+          <li>
+            <b>?spouse</b>  <b>lifestyle</b> (P1576) <b>vegetarianism</b> (Q83364) <br>
+          </li>
+        </ul>
+        <img src="p6.png" height="700px" alt="Complex Query">
+
+      </section>
+
+
     <section id="scholarly-article">
-      <!-- review? -->
-      <h2>User Interaction</h2>
-      <img src="usecase.PNG" width="100%">
-
-        </img>
-      <p>
-          The user is first presented with a homescreen that displays all the available options:
-      </p>
-
-    <p>
-        <i>Create query</i> allows the user to create a new query and select either Wikidata, DBPedia or both as the knowledge base.
-        The user also has the choice of using either the built-in GUI for creating queries or using <i>advanced syntax</i> in
-        order to write the query manually themselves. The results are nevertheless the same.
-    </p>
-    <p>
-        <i>Recent</i> shows the 10 previous queries inputed by the user, provided cookies are enabled.
-    </p>
-    <p>
-        <i>Examples</i> displays a list of possible queries in both simple and advanced syntax.
-    </p>
-    <p>
-        Postprocessing is also available via additional filtering and grouping methods (such as grouping results by country or time spans etc).
-    </p>
-    </section>
-    <section id="hypermedia">
       <!-- review? -->
       <h2>User Interface</h2>
       <p>
-        For basic queries, the user can use the <it>Simple Query Interface</it> to specify rules for
-        accessing data: a property and an item that will be mapped to the internal codes used in Wikidata.
+        A limited number of classes and properties are currently not available from
+        <a role="doc-biblioref">schema.org</a>. In most if not all cases it would be desirable to
+        make them available there, but while work is progressing it is simpler to define them
+        ourselves.
       </p>
       <img src="mock1.png" width="600px" alt="Mock Simple Query">
-      <p class="issue">
-        For more complex queries, the <it>SPARQL Query</it> interface is available, where the entire query 
-        can be specified. This USE CASE lets the user have more power over the retreived data, being able
-        to pick any fields in any order visible in the item's <a href="https://www.wikidata.org/wiki/Q378619">page</a>.
-      </p>
       <img src="mock2.png" width="600px" alt="Mock SPARQL Query">
-      
     </section>
+
     <section id="acks">
       <!-- review? -->
       <h2>Conclusions and Improvement</h2>
-      <p>BiR set out to be a great visualization and aggregator for Big Data and is shaping up nicely. Its intended purpose is to make exploratory analysis of resources
-      such as those provided by Wikidata or DBPedia much easier, and bring new, intuitive and descriptive visual representations to the table.</p>
       <p>
-          Using JavaScript and Python, BiR is very lightweight and completely platform-independent; being available on virtually any OS. Full-fledged support for mobile versions
-          is in the works as well.
+        Scholarly HTML would like to thank <a href="http://scholarlyhtml.org/">Scholarly HTML</a>
+        (you read that right) for blazing the trail perhaps a few years too soon. Particularly,
+        the following people were particularly kind and helpful:
+        <a href="https://twitter.com/ptsefton">Peter Sefton</a>,
+        <a href="https://twitter.com/blahah404">Richard Smith-Unna</a>, and
+        <a href="https://twitter.com/petermurrayrust">Peter Murray-Rust</a>.
       </p>
-
+      <p>
+        PLOS has a
+        <a href="http://blogs.plos.org/mfenner/2011/03/19/a-very-brief-history-of-scholarly-html/">short
+        history of Scholarly HTML</a> that is worth reading (and would be worth updating).
+      </p>
+      <p>
+        Dan Brickley was kind enough to drop by the office to chat about our usage of
+        <a href="http://schema.org">schema.org</a> even though he was tired and hungry. As
+        always, examples involving fish tanks are the most helpful. Dave Cramer shared ideas
+        that we happily stole.
+      </p>
+      <p>
+        Patrick Johnston’s input has been crucial, notably in modeling authoring. We can only
+        hope that getting those details exactly right have not caused him to lose too much
+        sleep.
+      </p>
+      <p>
+        We also received very useful feedback and pointers from: Kjetil Kjernsmo (DAHUT!),
+        Silvio Peroni, Justin Johansson, Alf Eaton, Raniere Silvia, Kaveh Bazargan and Mike
+        Smith. We are very much indebted to the help provided us by Ivan Herman.
+      </p>
+      <p>
+        If we somehow forgot you in this list and you are too gracious to complain, we love you
+        all the same.
+      </p>
     </section>
 
     <section id="refs">
